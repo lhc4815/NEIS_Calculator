@@ -55,12 +55,15 @@ const NEISCalculator = () => {
     const handleLike = async () => {
       if (isLiked || !text.trim()) return;
       
-      setLikeCount(prev => prev + 1);
-      setIsLiked(true);
-
+      console.log('환경변수 확인:', {
+        baseId: process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID,
+        // API 키는 보안상 전체를 출력하지 않음
+        apiKeyPrefix: process.env.NEXT_PUBLIC_AIRTABLE_API_KEY.substring(0, 5)
+      });
+    
       try {
-        // 백그라운드에서 조용히 저장
-        await base('SavedTexts').create([
+        console.log('Airtable 저장 시도...');
+        const result = await base('SavedTexts').create([
           {
             fields: {
               'Count': 1,
@@ -68,8 +71,15 @@ const NEISCalculator = () => {
             }
           }
         ]);
+        console.log('저장 결과:', result);
+        
+        setLikeCount(prev => prev + 1);
+        setIsLiked(true);
       } catch (error) {
-        console.error('Error saving to Airtable:', error);
+        console.error('에러 상세:', {
+          message: error.message,
+          error: error
+        });
       }
     };
    
